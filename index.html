@@ -86,6 +86,16 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
 .week .c i{display:block;background:var(--ink);border-radius:6px 6px 2px 2px;min-height:3px}
 .week .c.over i{background:var(--red)}.week .c.sel i{outline:3px solid var(--red);outline-offset:2px}
 .week .gl{position:absolute;left:0;right:0;border-top:2px dashed var(--green);pointer-events:none}
+.rh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px}.rh h2{margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(8.5em,1fr));gap:10px}
+.st{background:var(--bg);border-radius:14px;padding:10px 12px}.st small{display:block;color:var(--mute);font-size:13px}.st b{font-family:Archivo,sans-serif;font-size:24px;white-space:nowrap}.st b span{font-size:13px;color:var(--mute);font-family:Figtree,sans-serif;font-weight:600;margin-left:3px}
+.mchart{position:relative;display:flex;gap:2px;align-items:flex-end;height:150px;margin-top:16px}
+.mchart .c{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;border:0;background:none;padding:0;min-height:0;cursor:pointer}
+.mchart .c i{display:block;background:var(--ink);border-radius:3px 3px 1px 1px;min-height:2px}.mchart .c.over i{background:var(--red)}.mchart .c.none i{background:var(--line)}
+.mchart .gl{position:absolute;left:0;right:0;border-top:2px dashed var(--green);pointer-events:none}
+.ml{display:flex;justify-content:space-between;font-size:12px;color:var(--mute);margin-top:4px}
+h3{font-size:15px;margin:18px 0 8px}
+.top .tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);font-size:15px}.top .tr span:first-child{overflow-wrap:anywhere}.top em{font-style:normal;color:var(--mute)}
 .week .gl span{position:absolute;right:0;top:-20px;font-size:12px;color:var(--green);font-weight:700;background:var(--card);padding:0 4px}
 .wl{display:flex;gap:6px;margin-top:6px}.wl span{flex:1;text-align:center;font-size:12px;color:var(--mute)}
 .calc .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
@@ -176,6 +186,15 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
     <section class="card bars" style="margin-bottom:18px"><h2>By meal</h2><div id="bymeal"></div></section>
     <section class="card"><h2>Last 7 days</h2><div class="week" id="week"></div><div class="wl" id="wl"></div></section>
   </div>
+</div></div>
+
+<div class="band" style="padding-top:0"><div class="wrap">
+  <section class="card" id="recap">
+    <div class="rh"><h2 id="mTitle">Month</h2><div class="dnav"><button class="icon" id="mPrev" aria-label="Previous month">‹</button><button class="icon" id="mNext" aria-label="Next month">›</button></div></div>
+    <div class="stats" id="mStats"></div>
+    <div class="mchart" id="mChart"></div><div class="ml" id="mLab"></div>
+    <div class="two"><div class="top"><h3>Top foods</h3><div id="mTop"></div></div><div class="bars"><h3>Avg by meal</h3><div id="mMeal"></div></div></div>
+  </section>
 </div></div>
 
 <div class="band" style="padding-top:0"><div class="wrap">
@@ -278,8 +297,32 @@ function render(){
   const seen=new Map();for(const k of Object.keys(S.days).sort())for(const i of items(k))if(i.type===type)seen.set(i.name,i);
   $('recent').innerHTML=[...seen].slice(-40).map(([n])=>`<option value="${esc(n)}">`).join('');
   recentMap=seen;
+  if(typeof renderRecap==='function')renderRecap();
 }
 let recentMap=new Map();
+let mon=day.slice(0,7);
+const monShift=(m,n)=>{const [y,mm]=m.split('-').map(Number);const d=new Date(y,mm-1+n,1);return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')};
+function renderRecap(){
+  const [y,m]=mon.split('-').map(Number),dim=new Date(y,m,0).getDate(),ks=[...Array(dim)].map((_,i)=>mon+'-'+String(i+1).padStart(2,'0'));
+  $('mTitle').textContent=new Date(y,m-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});
+  $('mNext').disabled=mon>=key(new Date()).slice(0,7);
+  const T=ks.map(k=>({k,t:totals(k),n:items(k).some(i=>i.type!=='ex')})),L=T.filter(d=>d.n),n=L.length||1,avg=f=>L.reduce((a,d)=>a+f(d.t),0)/n;
+  const st=(lab,v,u='')=>`<div class="st"><small>${lab}</small><b>${v}${u?`<span>${u}</span>`:''}</b></div>`;
+  $('mStats').innerHTML=!L.length?'<p class="empty" style="padding:0">Nothing logged</p>':
+    st('Days logged',L.length,'/ '+dim)+st('On budget',L.filter(d=>d.t.net<=S.goal).length,'/ '+L.length)+st('Avg eaten',fmt(avg(t=>t.f)),'kcal')+st('Avg exercise',fmt(avg(t=>t.e)),'kcal')+
+    st('Avg net',fmt(avg(t=>t.net)),'kcal')+st('Protein',fmt(avg(t=>t.p)),'g/day')+st('Carbs',fmt(avg(t=>t.c)),'g/day')+st('Fat',fmt(avg(t=>t.fa)),'g/day');
+  const top=Math.max(S.goal,...T.map(d=>Math.max(0,d.t.net)))*1.12;
+  $('mChart').innerHTML=T.map(d=>`<button class="c${!d.n?' none':d.t.net>S.goal?' over':''}" data-day="${d.k}" aria-label="${d.k}: ${fmt(d.t.net)} kcal"><i style="height:${d.n?Math.max(0,d.t.net)/top*100:0}%"></i></button>`).join('')+`<div class="gl" style="bottom:${(S.goal/top*100).toFixed(2)}%"></div>`;
+  $('mLab').innerHTML=`<span>1</span><span>${Math.ceil(dim/2)}</span><span>${dim}</span>`;
+  const g=new Map();for(const d of T)for(const i of items(d.k))if(i.type!=='ex'){const o=g.get(i.name)||{c:0,k:0};o.c+=i.qty;o.k+=i.kcal*i.qty;g.set(i.name,o)}
+  const tops=[...g].sort((a,b)=>b[1].c-a[1].c||b[1].k-a[1].k).slice(0,5);
+  $('mTop').innerHTML=tops.length?tops.map(([nm,o])=>`<div class="tr"><span>${esc(nm)}</span><em>×${+o.c.toFixed(2)}</em><span class="k">${fmt(o.k)}</span></div>`).join(''):'<p class="empty" style="padding:0">—</p>';
+  const per=CATS.map(c=>[c,L.length?L.reduce((a,d)=>a+items(d.k).filter(i=>i.type!=='ex'&&i.cat===c).reduce((x,i)=>x+i.kcal*i.qty,0),0)/L.length:0]),mx=Math.max(1,...per.map(p=>p[1]));
+  $('mMeal').innerHTML=per.map(([c,v])=>`<div class="br"><span>${c}</span><div class="track"><i style="width:${v/mx*100}%"></i></div><span class="k">${fmt(v)}</span></div>`).join('');
+}
+$('mPrev').addEventListener('click',()=>{mon=monShift(mon,-1);renderRecap()});
+$('mNext').addEventListener('click',()=>{mon=monShift(mon,1);renderRecap()});
+$('mChart').addEventListener('click',e=>{const b=e.target.closest('[data-day]');if(b){day=b.dataset.day;render();window.scrollTo({top:0,behavior:'smooth'})}});
 
 function renderForm(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===type));

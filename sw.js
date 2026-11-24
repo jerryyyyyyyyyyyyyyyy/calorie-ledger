@@ -1,5 +1,5 @@
 // Offline support: serve the app shell from cache, update it in the background.
-const CACHE = 'calorie-ledger-v4';
+const CACHE = 'calorie-ledger-v5';
 const SHELL = ['./', 'index.html', 'manifest.json', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => {

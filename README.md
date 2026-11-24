@@ -14,6 +14,7 @@ It's a single-page web app you can install on your iPhone's home screen. It work
 - **Garmin screenshots**: screenshot a workout in Garmin Connect and the app reads the calories off it
 - **80% exercise setting**: counts only 80% of watch calories, since watches tend to overestimate
 - **History**: day-by-day navigation, breakdown by meal, last-7-days chart
+- **Monthly recap**: days logged, days on budget, average calories and macros, a daily chart, top foods and average by meal
 - **Budget calculator**: Mifflin–St Jeor estimate of calories burned per day, plus macro targets (protein 1.8 g/kg, fat 0.9 g/kg, the rest from carbs)
 - **Backup**: export and restore your data as a JSON file
 
