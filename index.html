@@ -157,9 +157,11 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
       <div class="actions"><button class="primary" id="addBtn" type="submit">Add food</button><button type="button" id="cancel" hidden>Cancel</button></div>
       <div class="snap" id="snap" hidden>
         <p class="note" id="noKey" hidden style="margin:0 0 8px">Add a free Gemini API key in <a href="#settings" style="color:inherit">Settings</a> to estimate food from photos and read Garmin screenshots.</p>
+        <p class="note" id="healthTip" style="margin:0 0 8px">“Paste from Health” adds today’s Garmin active calories after you run the Health Shortcut (see README). It replaces itself if you paste again, so don’t also log the same workouts separately.</p>
         <label id="snapLab">Not on the list? Estimate it</label>
-        <div class="snapbtns"><button type="button" id="photoBtn" hidden>Take or choose a photo</button><button type="button" id="descBtn" hidden>Estimate from name</button></div>
+        <div class="snapbtns"><button type="button" class="primary" id="healthBtn" hidden>Paste from Health</button><button type="button" id="photoBtn" hidden>Take or choose a photo</button><button type="button" id="descBtn" hidden>Estimate from name</button></div>
         <input id="photo" type="file" accept="image/*" hidden>
+        <div id="healthBox" hidden class="f"><label for="healthIn">Couldn’t read the clipboard — long-press here and Paste</label><div class="row" style="margin:0"><input id="healthIn" inputmode="decimal" placeholder="e.g. 640 kcal"><button type="button" class="primary" id="healthSave">Add</button></div></div>
         <label class="adj" id="adjWrap" hidden><input type="checkbox" id="adj"> Count only 80% of exercise calories <span class="note" style="display:inline">(watches often overestimate)</span></label>
         <input id="hint" placeholder="Optional details: size, half eaten, no sugar…" aria-label="Details for the estimate">
         <div class="est" id="est" aria-live="polite"></div>
@@ -289,7 +291,7 @@ function renderForm(){
   $('photoBtn').textContent=type==='ex'?'Read a Garmin screenshot':'Take or choose a photo';
   $('descBtn').textContent=type==='ex'?'Estimate from activity name':'Estimate from name';
   $('hint').placeholder=type==='ex'?'Optional: duration, intensity (e.g. 2 h volleyball practice)':'Optional details: size, half eaten, no sugar…';
-  $('adjWrap').hidden=type!=='ex';
+  $('adjWrap').hidden=type!=='ex';$('healthBtn').hidden=type!=='ex';$('healthTip').hidden=type!=='ex';if(type!=='ex')$('healthBox').hidden=true;
   $('name').placeholder=type==='ex'?'e.g. Run 5 km':'e.g. Chicken rice';
   $('kcalLab').textContent=type==='ex'?'kcal burned':'kcal per serving';
   $('catWrap').hidden=type==='ex';$('macroRow').hidden=type==='ex';
@@ -426,6 +428,16 @@ Reply with only JSON in this shape:
   }
 }
 $('photoBtn').addEventListener('click',()=>$('photo').click());
+/* ---------- Apple Health active calories (copied by an iOS Shortcut) ---------- */
+function healthKcal(txt){const m=String(txt).replace(/,/g,'').match(/(\d+(?:\.\d+)?)\s*(kj|kilojoule|kcal|cal)?/i);if(!m)return null;let v=+m[1];if(m[2]&&/^k(j|ilojoule)/i.test(m[2]))v/=4.184;return v>0&&v<20000?Math.round(v):null}
+function addHealth(v){const gid='health-'+day,name='Active calories (Apple Health)';const had=items(day).some(i=>i.gid===gid);
+  S.days[day]={items:[...items(day).filter(i=>i.gid!==gid),{id:uid(),type:'ex',name,kcal:v,qty:1,cat:null,gid,t:Date.now()}]};persistDay(day);render();
+  $('healthBox').hidden=true;$('healthIn').value='';toast((had?'Updated':'Added')+' '+fmt(v)+' active kcal',false)}
+$('healthBtn').addEventListener('click',async()=>{let t='';
+  try{t=await navigator.clipboard.readText()}catch(e){}
+  const v=healthKcal(t);if(v){addHealth(v);return}
+  $('healthBox').hidden=false;$('healthIn').focus();if(t)toast('Clipboard has no calorie number — run the Shortcut first',false)});
+$('healthSave').addEventListener('click',()=>{const v=healthKcal($('healthIn').value);if(v)addHealth(v);else toast('Enter a calorie number',false)});
 $('photo').addEventListener('change',async()=>{const f=$('photo').files[0];$('photo').value='';if(!f)return;
   let blob;try{blob=await toJpeg(f)}catch(e){blob=f}
   if(thumb)URL.revokeObjectURL(thumb);thumb=URL.createObjectURL(blob);estimate(blob)});

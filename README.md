@@ -30,6 +30,25 @@ It's a single-page web app you can install on your iPhone's home screen. It work
 
 The key is saved only in your browser on this device and is sent only to Google's Gemini API. It's never stored in this repository. The default model is `gemini-3.5-flash-lite`, and you can change it in Settings.
 
+## Garmin calories via Apple Health (free, no Mac)
+
+Garmin Connect can share your active calories with Apple Health. An iPhone Shortcut copies today's total, and the app pastes it in.
+
+**1. Let Garmin write to Health.** In Garmin Connect, go to Settings → Connected Apps → Apple Health and allow it to share active calories.
+
+**2. Build the Shortcut** (Shortcuts app → **+**):
+1. Add **Find Health Samples**. Set *Type* to **Active Energy** and add a filter: *Start Date* **is today**.
+2. Add **Calculate Statistics**. Set it to **Sum**.
+3. Add **Copy to Clipboard**.
+4. Optional: add **Show Notification** with the text "Copied — open Calorie Ledger".
+5. Name it **Log Garmin calories**.
+
+**3. Each evening:** run the Shortcut. You can also add it to your home screen or ask Siri to run it. Then open the app, switch to **Exercise** and tap **Paste from Health**.
+
+This adds one "Active calories (Apple Health)" entry for the selected day. Pasting again replaces it, so run it as late in the day as you like. It already includes your workouts, so don't also log those workouts separately. The 80% setting still applies.
+
+If Safari blocks reading the clipboard, a box appears: long-press it and tap **Paste**.
+
 ## Your data
 
 Everything is stored in your browser's local storage on this device. Nothing syncs between devices. **Clearing Safari's website data erases your log**, so use **Export backup** now and then.
