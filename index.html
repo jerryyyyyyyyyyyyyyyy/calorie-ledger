@@ -24,6 +24,7 @@
 :root{color-scheme:light dark;--bg:light-dark(#ffffff,#121212);--card:light-dark(#f4f3f0,#1d1d1c);--ink:light-dark(#17171a,#f1f0ec);--mute:light-dark(#5e5d63,#a9a8a3);--line:light-dark(#e2e0db,#2e2e2c);--red:light-dark(#e2432a,#ff6a4f);--redbg:light-dark(#fde5df,#3a1d17);--green:light-dark(#1f8a4c,#4fcf86);--greenbg:light-dark(#dff3e6,#16301f)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}
+[hidden]{display:none!important}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Figtree,system-ui,sans-serif;overflow-x:clip}
 .band{padding:clamp(20px,3.5vw,48px) max(5vw,16px)}
 .wrap{max-width:1180px;margin:0 auto}
@@ -112,7 +113,7 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
 <body>
 <div class="band"><div class="wrap">
   <div class="top">
-    <div><h1>Calorie Ledger</h1><div class="sync" id="sync">Saved on this device</div></div>
+    <div><h1>Calorie Ledger</h1><div class="sync" id="sync"></div></div>
     <div class="dnav">
       <button class="icon" id="prev" aria-label="Previous day">‹</button>
       <strong id="dlabel">Today</strong>
@@ -123,7 +124,7 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
 
   <div class="hero">
     <section class="card bal" aria-live="polite">
-      <small id="balLabel">Left today</small>
+      <small id="balLabel">Left</small>
       <div class="big" id="left">0<span>kcal</span></div>
       <div class="eq">
         <span>Budget <b id="eGoal">0</b></span>
@@ -131,10 +132,10 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
         <span>+ Exercise <b id="eEx">0</b><em id="eAdj" style="font-style:normal;font-size:13px"></em></span>
       </div>
       <div class="meter"><i id="meter"></i></div>
-      <div class="mlab"><span id="pct">0% used</span><span><button id="goalBtn" style="min-height:28px;font-size:13px">Change budget</button></span></div>
+      <div class="mlab"><span id="pct">0%</span><span><button id="goalBtn" style="min-height:28px;font-size:13px">Edit</button></span></div>
       <div class="mac" id="macros"></div>
       <div class="f" id="goalEdit" hidden style="margin-top:12px">
-        <label for="goalIn">Daily calorie budget</label>
+        <label for="goalIn">Budget (kcal)</label>
         <input id="goalIn" type="number" inputmode="numeric" min="800" max="6000" style="margin-bottom:10px">
         <div class="row3"><div><label for="gP">Protein g</label><input id="gP" type="number" inputmode="numeric" min="0"></div><div><label for="gC">Carbs g</label><input id="gC" type="number" inputmode="numeric" min="0"></div><div><label for="gF">Fat g</label><input id="gF" type="number" inputmode="numeric" min="0"></div></div>
         <button class="primary" id="goalSave" style="width:100%;margin-top:10px">Save</button>
@@ -146,27 +147,25 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
         <button type="button" data-type="food" aria-pressed="true">Food</button>
         <button type="button" class="ex" data-type="ex" aria-pressed="false">Exercise</button>
       </div>
-      <div class="f"><label for="name" id="nameLab">What did you eat?</label><input id="name" list="recent" placeholder="e.g. Chicken rice" required></div>
+      <div class="f"><label for="name" id="nameLab">Food</label><input id="name" list="recent" required></div>
       <datalist id="recent"></datalist>
       <div class="row">
-        <div><label for="kcal" id="kcalLab">kcal per serving</label><input id="kcal" type="number" inputmode="numeric" min="0" max="5000" required></div>
+        <div><label for="kcal" id="kcalLab">kcal</label><input id="kcal" type="number" inputmode="numeric" min="0" max="5000" required></div>
         <div><label for="qty">Servings</label><input id="qty" type="number" inputmode="decimal" min="0.25" step="0.25" value="1"></div>
       </div>
-      <div class="row3" id="macroRow"><div><label for="pIn">Protein g</label><input id="pIn" type="number" inputmode="decimal" min="0" step="0.1" placeholder="optional"></div><div><label for="cIn">Carbs g</label><input id="cIn" type="number" inputmode="decimal" min="0" step="0.1" placeholder="optional"></div><div><label for="fIn">Fat g</label><input id="fIn" type="number" inputmode="decimal" min="0" step="0.1" placeholder="optional"></div></div>
+      <div class="row3" id="macroRow"><div><label for="pIn">Protein</label><input id="pIn" type="number" inputmode="decimal" min="0" step="0.1"></div><div><label for="cIn">Carbs</label><input id="cIn" type="number" inputmode="decimal" min="0" step="0.1"></div><div><label for="fIn">Fat</label><input id="fIn" type="number" inputmode="decimal" min="0" step="0.1"></div></div>
       <div class="f" id="catWrap"><label>Meal</label><div class="chips" id="cats"></div></div>
       <div class="actions"><button class="primary" id="addBtn" type="submit">Add food</button><button type="button" id="cancel" hidden>Cancel</button></div>
       <div class="snap" id="snap" hidden>
-        <p class="note" id="noKey" hidden style="margin:0 0 8px">Add a free Gemini API key in <a href="#settings" style="color:inherit">Settings</a> to estimate food from photos and read Garmin screenshots.</p>
-        <p class="note" id="healthTip" style="margin:0 0 8px">“Paste from Health” adds today’s Garmin active calories after you run the Health Shortcut (see README). It replaces itself if you paste again, so don’t also log the same workouts separately.</p>
-        <label id="snapLab">Not on the list? Estimate it</label>
-        <div class="snapbtns"><button type="button" class="primary" id="healthBtn" hidden>Paste from Health</button><button type="button" id="photoBtn" hidden>Take or choose a photo</button><button type="button" id="descBtn" hidden>Estimate from name</button></div>
+        <p class="note" id="noKey" hidden style="margin:0 0 8px"><a href="#settings" style="color:inherit">Add Gemini key</a> for photo estimates</p>
+        <label id="snapLab">Estimate</label>
+        <div class="snapbtns"><button type="button" id="photoBtn" hidden>Take or choose a photo</button><button type="button" id="descBtn" hidden>Estimate from name</button></div>
         <input id="photo" type="file" accept="image/*" hidden>
-        <div id="healthBox" hidden class="f"><label for="healthIn">Couldn’t read the clipboard — long-press here and Paste</label><div class="row" style="margin:0"><input id="healthIn" inputmode="decimal" placeholder="e.g. 640 kcal"><button type="button" class="primary" id="healthSave">Add</button></div></div>
-        <label class="adj" id="adjWrap" hidden><input type="checkbox" id="adj"> Count only 80% of exercise calories <span class="note" style="display:inline">(watches often overestimate)</span></label>
-        <input id="hint" placeholder="Optional details: size, half eaten, no sugar…" aria-label="Details for the estimate">
+        <label class="adj" id="adjWrap" hidden><input type="checkbox" id="adj"> Count 80% of exercise</label>
+        <input id="hint" placeholder="Details (optional)" aria-label="Details">
         <div class="est" id="est" aria-live="polite"></div>
       </div>
-      <div class="presets"><label>Quick add</label><div class="chips" id="presets"></div><p class="note">Quick-add values are rough averages — check labels for accuracy.</p></div>
+      <div class="presets"><label>Quick add</label><div class="chips" id="presets"></div></div>
     </form>
   </div>
 </div></div>
@@ -175,43 +174,41 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
   <section class="ledger"><h2 id="logTitle">Today's log</h2><div id="log"></div></section>
   <div>
     <section class="card bars" style="margin-bottom:18px"><h2>By meal</h2><div id="bymeal"></div></section>
-    <section class="card"><h2>Last 7 days <span class="sync">(net kcal)</span></h2><div class="week" id="week"></div><div class="wl" id="wl"></div></section>
+    <section class="card"><h2>Last 7 days</h2><div class="week" id="week"></div><div class="wl" id="wl"></div></section>
   </div>
 </div></div>
 
 <div class="band" style="padding-top:0"><div class="wrap">
   <section class="card calc">
-    <h2>What should my daily budget be?</h2>
+    <h2>Budget calculator</h2>
     <div class="grid">
       <div><label for="sex">Sex</label><select id="sex"><option value="m">Male</option><option value="f">Female</option></select></div>
       <div><label for="age">Age</label><input id="age" type="number" inputmode="numeric" value="21" min="15" max="90"></div>
       <div><label for="ht">Height (cm)</label><input id="ht" type="number" inputmode="numeric" value="172" min="120" max="230"></div>
       <div><label for="wt">Weight (kg)</label><input id="wt" type="number" inputmode="decimal" value="68" min="30" max="250"></div>
       <div style="grid-column:span 2"><label for="act">Activity</label><select id="act">
-        <option value="1.2">Mostly sitting</option><option value="1.375" selected>Light exercise 1–3 days/week</option><option value="1.55">Moderate 3–5 days/week</option><option value="1.725">Hard 6–7 days/week</option><option value="1.9">Very hard / physical job</option></select></div>
-      <div style="grid-column:span 2"><label for="aim">Goal</label><select id="aim"><option value="-500">Lose about 0.5 kg/week</option><option value="0" selected>Stay the same</option><option value="300">Gain slowly</option></select></div>
+        <option value="1.2">Sedentary</option><option value="1.375" selected>Light</option><option value="1.55">Moderate</option><option value="1.725">Hard</option><option value="1.9">Very hard</option></select></div>
+      <div style="grid-column:span 2"><label for="aim">Goal</label><select id="aim"><option value="-500">Lose</option><option value="0" selected>Maintain</option><option value="300">Gain</option></select></div>
     </div>
-    <div class="res"><span>Maintenance <b id="tdee">0</b> kcal</span><span>Suggested budget <b id="sugg">0</b> kcal</span><button class="primary" id="useSugg">Use as my budget</button></div>
+    <div class="res"><span>Maintenance <b id="tdee">0</b></span><span>Budget <b id="sugg">0</b></span><button class="primary" id="useSugg">Use</button></div>
     <div class="res" style="margin-top:8px"><span>Protein <b id="mP">0</b> g</span><span>Carbs <b id="mC">0</b> g</span><span>Fat <b id="mF">0</b> g</span></div>
-    <p class="note">Macros: protein 1.8 g/kg and fat 0.9 g/kg of body weight, the rest from carbs to fuel running and training. Uses the Mifflin–St Jeor equation. It's an estimate — adjust after two or three weeks based on how your weight actually moves.</p>
   </section>
 </div></div>
 
 <div class="band" style="padding-top:0" id="settings"><div class="wrap two">
   <section class="card">
-    <h2>Photo estimates (Gemini)</h2>
-    <div class="f"><label for="gKey">Gemini API key</label><input id="gKey" type="password" autocomplete="off" spellcheck="false" placeholder="Paste your key from Google AI Studio"></div>
+    <h2>Gemini</h2>
+    <div class="f"><label for="gKey">API key</label><input id="gKey" type="password" autocomplete="off" spellcheck="false"></div>
     <div class="f"><label for="gModel">Model</label><input id="gModel" spellcheck="false" autocapitalize="off"></div>
     <button class="primary" id="gSave" style="width:100%">Save</button>
-    <p class="note">Your key stays on this device and is sent only to Google’s Gemini API. Get one free at <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a>.</p>
+    <p class="note"><a href="https://aistudio.google.com/apikey" style="color:inherit">Get a free key</a></p>
   </section>
   <section class="card">
     <h2>Backup</h2>
-    <p class="note" style="margin:0 0 12px">Your log lives only on this device. Export a backup now and then — choose Google Drive or Save to Files in the share sheet. Clearing Safari’s website data erases the log.</p>
-    <div class="actions" style="margin-top:0"><button class="primary" id="exportBtn">Export backup</button><button id="importBtn">Restore</button></div>
+    <div class="actions" style="margin-top:0"><button class="primary" id="exportBtn">Export</button><button id="importBtn">Restore</button></div>
     <input id="importFile" type="file" accept="application/json,.json" hidden>
-    <div class="actions"><button id="wipeBtn">Erase all data</button></div>
-    <div id="wipeAsk" hidden style="margin-top:10px"><p style="margin:0 0 8px">Erase every entry on this device? This can’t be undone.</p><div class="actions" style="margin-top:0"><button class="primary" id="wipeYes" style="background:var(--red);border-color:var(--red)">Erase</button><button id="wipeNo">Cancel</button></div></div>
+    <div class="actions"><button id="wipeBtn">Erase all</button></div>
+    <div id="wipeAsk" hidden style="margin-top:10px"><p style="margin:0 0 8px">Erase everything?</p><div class="actions" style="margin-top:0"><button class="primary" id="wipeYes" style="background:var(--red);border-color:var(--red)">Erase</button><button id="wipeNo">Cancel</button></div></div>
   </section>
 </div></div>
 
@@ -244,24 +241,24 @@ const mtxt=i=>i.type==='ex'||(i.p==null&&i.c==null&&i.f==null)?'':`<em class="m"
 /* ---------- storage: this device only ---------- */
 function persistDay(){saveLocal()}
 function persistGoal(){saveLocal()}
-function saveLocal(){try{localStorage.setItem('calLedger',JSON.stringify(S));$('sync').textContent='Saved on this device'}catch(e){$('sync').textContent='Couldn’t save — storage is full or blocked'}}
+function saveLocal(){try{localStorage.setItem('calLedger',JSON.stringify(S));$('sync').textContent=''}catch(e){$('sync').textContent='Not saved — storage full'}}
 
 /* ---------- rendering ---------- */
 function render(){
   const t=totals(day),left=S.goal-t.net,used=S.goal?t.net/S.goal:0,isToday=day===key(new Date());
   const d=fromKey(day);
-  $('dlabel').textContent=isToday?'Today':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
-  $('balLabel').textContent=left<0?(isToday?'Over budget today':'Over budget'):(isToday?'Left today':'Left that day');
+  $('today').hidden=isToday;$('dlabel').textContent=isToday?'Today':d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+  $('balLabel').textContent=left<0?'Over':'Left';
   $('left').className='big'+(left<0?' over':'');
   $('left').innerHTML=fmt(Math.abs(left))+'<span>kcal'+(left<0?' over':'')+'</span>';
   $('eGoal').textContent=fmt(S.goal);$('eFood').textContent=fmt(t.f);$('eEx').textContent=fmt(t.e);$('eAdj').textContent=S.exAdj!==false&&t.e?' (80% counted)':'';$('adj').checked=S.exAdj!==false;
   $('meter').style.width=Math.min(100,Math.max(0,used*100))+'%';$('meter').className=used>1?'':'ok';
-  $('pct').textContent=Math.round(used*100)+'% of budget used';
+  $('pct').textContent=Math.round(used*100)+'%';
   const tg=targets();$('macros').innerHTML=[['Protein','p',t.p,tg.p],['Carbs','c',t.c,tg.c],['Fat','fa',t.fa,tg.f]].map(([n,c,v,g])=>`<div class="mr ${c}${c!=='p'&&v>g*1.1?' over':''}"><span>${n}</span><div class="track"><i style="width:${g?Math.min(100,v/g*100):0}%"></i></div><span>${fmt(v)} / ${fmt(g)} g</span></div>`).join('');
-  $('logTitle').textContent=isToday?"Today's log":'Log for '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  $('logTitle').textContent=isToday?'Today':d.toLocaleDateString('en-US',{month:'short',day:'numeric'});
 
   const list=items(day);
-  if(!list.length){$('log').innerHTML='<p class="empty">Nothing logged yet. Add your first meal with the form, or tap a quick-add.</p>'}
+  if(!list.length){$('log').innerHTML='<p class="empty">Nothing logged</p>'}
   else{
     const groups=[...CATS,'Exercise'].map(c=>[c,list.filter(i=>(i.type==='ex'?'Exercise':i.cat)===c)]).filter(g=>g[1].length);
     $('log').innerHTML=groups.map(([c,arr])=>{const sum=arr.reduce((a,i)=>a+i.kcal*i.qty,0),ex=c==='Exercise';
@@ -286,18 +283,18 @@ let recentMap=new Map();
 
 function renderForm(){
   document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.type===type));
-  $('nameLab').textContent=type==='ex'?'What exercise?':'What did you eat?';
-  $('snapLab').textContent=type==='ex'?'Read your watch screenshot, or estimate':'Not on the list? Estimate it';
-  $('photoBtn').textContent=type==='ex'?'Read a Garmin screenshot':'Take or choose a photo';
-  $('descBtn').textContent=type==='ex'?'Estimate from activity name':'Estimate from name';
-  $('hint').placeholder=type==='ex'?'Optional: duration, intensity (e.g. 2 h volleyball practice)':'Optional details: size, half eaten, no sugar…';
-  $('adjWrap').hidden=type!=='ex';$('healthBtn').hidden=type!=='ex';$('healthTip').hidden=type!=='ex';if(type!=='ex')$('healthBox').hidden=true;
-  $('name').placeholder=type==='ex'?'e.g. Run 5 km':'e.g. Chicken rice';
-  $('kcalLab').textContent=type==='ex'?'kcal burned':'kcal per serving';
+  $('nameLab').textContent=type==='ex'?'Exercise':'Food';
+  $('snapLab').textContent='Estimate';
+  $('photoBtn').textContent=type==='ex'?'Screenshot':'Photo';
+  $('descBtn').textContent='From name';
+  $('hint').placeholder='Details (optional)';
+  $('adjWrap').hidden=type!=='ex';
+  $('name').placeholder='';
+  $('kcalLab').textContent='kcal';
   $('catWrap').hidden=type==='ex';$('macroRow').hidden=type==='ex';
   $('cats').innerHTML=CATS.map(c=>`<button type="button" data-cat="${c}" aria-pressed="${c===cat}">${c}</button>`).join('');
   $('presets').innerHTML=PRESETS[type].map(([n,k],i)=>`<button type="button" data-p="${i}">${n} · ${k}</button>`).join('');
-  $('addBtn').textContent=editing?'Save changes':type==='ex'?'Add exercise':'Add food';
+  $('addBtn').textContent=editing?'Save':'Add';
   $('cancel').hidden=!editing;
 }
 
@@ -345,7 +342,7 @@ function calc(){const w=+$('wt').value,h=+$('ht').value,a=+$('age').value;
   return Math.round(sug/10)*10}
 try{const c=JSON.parse(localStorage.getItem('calCalc')||'null');if(c)['sex','age','ht','wt','act','aim'].forEach((i,n)=>{if(c[n]!=null)$(i).value=c[n]})}catch(e){}
 ['sex','age','ht','wt','act','aim'].forEach(i=>$(i).addEventListener('input',calc));
-$('useSugg').addEventListener('click',()=>{const k=calc();setGoal(k,calcM);toast('Budget set to '+fmt(S.goal)+' kcal with macro targets',false)});
+$('useSugg').addEventListener('click',()=>{const k=calc();setGoal(k,calcM);toast('Budget set',false)});
 
 /* ---------- photo / name estimate via Gemini ---------- */
 let ctl=null,est=null,thumb=null;
@@ -382,17 +379,17 @@ async function toJpeg(file){
 function estHTML(inner){return `<div class="estbox${thumb?'':' noimg'}">${thumb?`<img src="${thumb}" alt="Your photo">`:''}<div>${inner}</div></div>`}
 function showEst(){
   if(!est){$('est').innerHTML='';return}
-  if(!est.items.length){$('est').innerHTML=estHTML(`<p class="note" style="margin:0">${est.kind==='ex'?'Couldn’t find any workouts. Try a screenshot that shows the calories.':'Couldn’t spot any food. Try a clearer photo or type the name.'}</p>`);return}
+  if(!est.items.length){$('est').innerHTML=estHTML(`<p class="note" style="margin:0">${est.kind==='ex'?'Nothing found':'No food found'}</p>`);return}
   const total=est.items.reduce((a,i)=>a+i.kcal,0);
   $('est').innerHTML=estHTML(est.items.map((i,n)=>`<div class="er"><span>${esc(i.name)}<em>${esc(i.portion||'')}${est.kind==='ex'?'':(i.portion?' · ':'')+`P ${i.p} · C ${i.c} · F ${i.f} g`}${i.dup?' · already logged':''}</em></span><span class="k${est.kind==='ex'?' e':''}">${est.kind==='ex'&&i.exact?'':'≈'}${fmt(i.kcal)}</span><button type="button" data-ai="${n}">Add</button></div>`).join('')+
     `<div class="estfoot">${est.items.length>1?`<button type="button" class="primary sm" data-ai="all">Add all · ≈${fmt(total)}</button>`:''}<button type="button" class="sm" data-ai="x">Dismiss</button></div>`+
-    `<p class="note">${est.confidence?esc(est.confidence[0].toUpperCase()+est.confidence.slice(1))+' confidence. ':''}${esc(est.note||'')} You can edit it after adding.</p>`);
+    `<p class="note">${est.confidence?esc(est.confidence[0].toUpperCase()+est.confidence.slice(1))+' confidence':''}</p>`);
 }
 async function estimate(blob){
   if(!sampleFn)return;
   const name=$('name').value.trim(),hint=$('hint').value.trim();
   const kind=type;
-  if(!blob&&!name&&!hint){toast(kind==='ex'?'Type the activity first':'Type the food name first',false);$('name').focus();return}
+  if(!blob&&!name&&!hint){toast('Enter a name first',false);$('name').focus();return}
   if(ctl)ctl.abort();ctl=new AbortController();est=null;
   $('est').innerHTML=estHTML(`<p style="margin:0 0 8px">${blob?'Looking at your photo…':'Estimating…'}</p><button type="button" class="sm" data-ai="stop">Stop</button>`);
   const wt=+$('wt').value;
@@ -423,21 +420,11 @@ Reply with only JSON in this shape:
     const c=e&&e.code;
     if(c==='cancelled'){$('est').innerHTML='';return}
         if(c==='images_unavailable'){$('photoBtn').hidden=true}
-    const msg={no_key:'Add your Gemini API key in Settings first.',bad_key:'Gemini rejected the request — check your API key in Settings.',bad_model:'That Gemini model name wasn’t found — check it in Settings.',offline:'No internet connection — try again when you’re online.',rate_limited:'Too many requests right now — try again in a bit.',session_expired:'Please sign in to Claude again.',image_rejected:'That image couldn’t be read — try another photo.',refused:'Couldn’t estimate that one — try typing the name.',invalid_json:'The estimate came back garbled — tap again to retry.',images_unavailable:'Photos aren’t available here — type the name instead.'}[c]||'Something went wrong — try again.';
+    const msg={no_key:'Add Gemini key in Settings',bad_key:'Check your Gemini key',bad_model:'Unknown model',offline:'Offline',rate_limited:'Too many requests — try later',image_rejected:'Can’t read that image',refused:'Couldn’t estimate',invalid_json:'Try again'}[c]||'Try again';
     $('est').innerHTML=estHTML(`<p class="note" style="margin:0">${msg}</p>`);
   }
 }
 $('photoBtn').addEventListener('click',()=>$('photo').click());
-/* ---------- Apple Health active calories (copied by an iOS Shortcut) ---------- */
-function healthKcal(txt){const m=String(txt).replace(/,/g,'').match(/(\d+(?:\.\d+)?)\s*(kj|kilojoule|kcal|cal)?/i);if(!m)return null;let v=+m[1];if(m[2]&&/^k(j|ilojoule)/i.test(m[2]))v/=4.184;return v>0&&v<20000?Math.round(v):null}
-function addHealth(v){const gid='health-'+day,name='Active calories (Apple Health)';const had=items(day).some(i=>i.gid===gid);
-  S.days[day]={items:[...items(day).filter(i=>i.gid!==gid),{id:uid(),type:'ex',name,kcal:v,qty:1,cat:null,gid,t:Date.now()}]};persistDay(day);render();
-  $('healthBox').hidden=true;$('healthIn').value='';toast((had?'Updated':'Added')+' '+fmt(v)+' active kcal',false)}
-$('healthBtn').addEventListener('click',async()=>{let t='';
-  try{t=await navigator.clipboard.readText()}catch(e){}
-  const v=healthKcal(t);if(v){addHealth(v);return}
-  $('healthBox').hidden=false;$('healthIn').focus();if(t)toast('Clipboard has no calorie number — run the Shortcut first',false)});
-$('healthSave').addEventListener('click',()=>{const v=healthKcal($('healthIn').value);if(v)addHealth(v);else toast('Enter a calorie number',false)});
 $('photo').addEventListener('change',async()=>{const f=$('photo').files[0];$('photo').value='';if(!f)return;
   let blob;try{blob=await toJpeg(f)}catch(e){blob=f}
   if(thumb)URL.revokeObjectURL(thumb);thumb=URL.createObjectURL(blob);estimate(blob)});
@@ -448,7 +435,7 @@ $('est').addEventListener('click',e=>{const b=e.target.closest('[data-ai]');if(!
   const pick=a==='all'?est.items:[est.items[+a]];
   let n=0;for(const i of pick){if(est.kind==='ex'){if(i.dup&&a==='all')continue;addItem({id:uid(),type:'ex',name:i.name,kcal:i.kcal,qty:1,cat:null,est:!i.exact,t:Date.now()})}
     else addItem({id:uid(),type:'food',name:i.name,kcal:i.kcal,p:i.p,c:i.c,f:i.f,qty:1,cat,est:true,t:Date.now()});n++}
-  toast(n===1?'Added '+pick.find(i=>!(i.dup&&a==='all')).name:n?'Added '+n+' items':'Already logged — nothing added',false);
+  toast(n===1?'Added '+pick.find(i=>!(i.dup&&a==='all')).name:n?'Added '+n+' items':'Already logged',false);
   if(a==='all')est=null;else est.items.splice(+a,1);
   if(est&&!est.items.length)est=null;showEst();$('hint').value='';
 });
@@ -457,7 +444,7 @@ $('adj').addEventListener('change',()=>{S.exAdj=$('adj').checked;persistGoal();r
 /* ---------- settings + backup ---------- */
 $('gKey').value=G.key;$('gModel').value=G.model;
 $('gSave').addEventListener('click',()=>{G.key=$('gKey').value.trim();G.model=$('gModel').value.trim()||'gemini-3.5-flash-lite';$('gModel').value=G.model;
-  try{localStorage.setItem('calGemini',JSON.stringify(G))}catch(e){}initAI();toast(G.key?'Gemini key saved on this device':'Gemini key removed',false)});
+  try{localStorage.setItem('calGemini',JSON.stringify(G))}catch(e){}initAI();toast(G.key?'Saved':'Key removed',false)});
 $('exportBtn').addEventListener('click',async()=>{const name='calorie-ledger-'+key(new Date())+'.json',json=JSON.stringify({app:'calorie-ledger',version:1,exported:new Date().toISOString(),data:S},null,1),blob=new Blob([json],{type:'application/json'});
   try{const file=new File([json],name,{type:'application/json'});
     if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Calorie Ledger backup'});return}}
@@ -467,7 +454,7 @@ $('importBtn').addEventListener('click',()=>$('importFile').click());
 $('importFile').addEventListener('change',async()=>{const f=$('importFile').files[0];$('importFile').value='';if(!f)return;
   try{const txt=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result));fr.onerror=()=>rej(fr.error);fr.readAsText(f)});const j=JSON.parse(txt);const d=j.data||j;if(!d||typeof d.days!=='object')throw 0;
     let n=0;for(const k in d.days){if(!/^\d{4}-\d{2}-\d{2}$/.test(k))continue;const have=new Set(items(k).map(i=>i.id));const add=(d.days[k].items||[]).filter(i=>i&&i.id&&!have.has(i.id));if(add.length){S.days[k]={items:[...items(k),...add]};n+=add.length}}
-    if(d.goal&&!S.macros&&d.macros)S.macros=d.macros;saveLocal();render();toast('Restored '+n+(n===1?' entry':' entries'),false)}catch(e){toast('That file isn’t a Calorie Ledger backup',false)}});
+    if(d.goal&&!S.macros&&d.macros)S.macros=d.macros;saveLocal();render();toast('Restored '+n+(n===1?' entry':' entries'),false)}catch(e){toast('Not a backup file',false)}});
 $('wipeBtn').addEventListener('click',()=>{$('wipeAsk').hidden=false});
 $('wipeNo').addEventListener('click',()=>{$('wipeAsk').hidden=true});
 $('wipeYes').addEventListener('click',()=>{S={goal:2000,macros:null,exAdj:true,days:{}};saveLocal();$('wipeAsk').hidden=true;render();toast('All entries erased',false)});
