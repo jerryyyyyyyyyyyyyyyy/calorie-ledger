@@ -51,7 +51,12 @@ If Safari blocks reading the clipboard, a box appears: long-press it and tap **P
 
 ## Your data
 
-Everything is stored in your browser's local storage on this device. Nothing syncs between devices. **Clearing Safari's website data erases your log**, so use **Export backup** now and then.
+Everything is stored in your browser's local storage on this device. Nothing syncs between devices. **Clearing Safari's website data erases your log**, so back up now and then:
+
+- **Back up to Google Drive:** tap **Export backup** and choose **Drive** in the share sheet. This needs the Google Drive app on your iPhone.
+- **Restore:** tap **Restore**, then **Browse → Google Drive**, and pick the latest file. Restoring merges entries and skips ones already there, so it never creates duplicates.
+
+To show Google Drive in the restore file picker, open the Files app, go to **Browse → ⋯ → Edit**, and turn on **Google Drive**.
 
 ## Run locally
 

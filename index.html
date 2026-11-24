@@ -207,7 +207,7 @@ input,select{width:100%;min-height:44px;border:1px solid var(--line);border-radi
   </section>
   <section class="card">
     <h2>Backup</h2>
-    <p class="note" style="margin:0 0 12px">Your log lives only on this device. Export a backup now and then — clearing Safari’s website data erases it.</p>
+    <p class="note" style="margin:0 0 12px">Your log lives only on this device. Export a backup now and then — choose Google Drive or Save to Files in the share sheet. Clearing Safari’s website data erases the log.</p>
     <div class="actions" style="margin-top:0"><button class="primary" id="exportBtn">Export backup</button><button id="importBtn">Restore</button></div>
     <input id="importFile" type="file" accept="application/json,.json" hidden>
     <div class="actions"><button id="wipeBtn">Erase all data</button></div>
@@ -458,8 +458,11 @@ $('adj').addEventListener('change',()=>{S.exAdj=$('adj').checked;persistGoal();r
 $('gKey').value=G.key;$('gModel').value=G.model;
 $('gSave').addEventListener('click',()=>{G.key=$('gKey').value.trim();G.model=$('gModel').value.trim()||'gemini-3.5-flash-lite';$('gModel').value=G.model;
   try{localStorage.setItem('calGemini',JSON.stringify(G))}catch(e){}initAI();toast(G.key?'Gemini key saved on this device':'Gemini key removed',false)});
-$('exportBtn').addEventListener('click',()=>{const blob=new Blob([JSON.stringify({app:'calorie-ledger',version:1,exported:new Date().toISOString(),data:S},null,1)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='calorie-ledger-'+key(new Date())+'.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)});
+$('exportBtn').addEventListener('click',async()=>{const name='calorie-ledger-'+key(new Date())+'.json',json=JSON.stringify({app:'calorie-ledger',version:1,exported:new Date().toISOString(),data:S},null,1),blob=new Blob([json],{type:'application/json'});
+  try{const file=new File([json],name,{type:'application/json'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Calorie Ledger backup'});return}}
+  catch(e){if(e&&e.name==='AbortError')return}
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)});
 $('importBtn').addEventListener('click',()=>$('importFile').click());
 $('importFile').addEventListener('change',async()=>{const f=$('importFile').files[0];$('importFile').value='';if(!f)return;
   try{const txt=await new Promise((res,rej)=>{const fr=new FileReader();fr.onload=()=>res(String(fr.result));fr.onerror=()=>rej(fr.error);fr.readAsText(f)});const j=JSON.parse(txt);const d=j.data||j;if(!d||typeof d.days!=='object')throw 0;
