@@ -123,7 +123,7 @@ h3{font-size:15px;margin:18px 0 8px}
 <body>
 <div class="band"><div class="wrap">
   <div class="top">
-    <div><h1>Calorie Ledger</h1><div class="sync" id="sync"></div></div>
+    <div><h1>Calorie Ledger</h1><div class="sync" id="sync"></div><button id="recapBtn" style="margin-top:10px">Monthly recap</button></div>
     <div class="dnav">
       <button class="icon" id="prev" aria-label="Previous day">‹</button>
       <strong id="dlabel">Today</strong>
@@ -188,16 +188,16 @@ h3{font-size:15px;margin:18px 0 8px}
   </div>
 </div></div>
 
-<div class="band" style="padding-top:0"><div class="wrap">
+<div class="band" style="padding-top:0" id="recapBand" hidden><div class="wrap">
   <section class="card" id="recap">
-    <div class="rh"><h2 id="mTitle">Month</h2><div class="dnav"><button class="icon" id="mPrev" aria-label="Previous month">‹</button><button class="icon" id="mNext" aria-label="Next month">›</button></div></div>
+    <div class="rh"><h2 id="mTitle">Month</h2><div class="dnav"><button class="icon" id="mPrev" aria-label="Previous month">‹</button><button class="icon" id="mNext" aria-label="Next month">›</button><button class="icon" id="recapClose" aria-label="Close recap">×</button></div></div>
     <div class="stats" id="mStats"></div>
     <div class="mchart" id="mChart"></div><div class="ml" id="mLab"></div>
     <div class="two"><div class="top"><h3>Top foods</h3><div id="mTop"></div></div><div class="bars"><h3>Avg by meal</h3><div id="mMeal"></div></div></div>
   </section>
 </div></div>
 
-<div class="band" style="padding-top:0"><div class="wrap">
+<div class="band" style="padding-top:0" id="calcBand"><div class="wrap">
   <section class="card calc">
     <h2>Budget calculator</h2>
     <div class="grid">
@@ -215,7 +215,7 @@ h3{font-size:15px;margin:18px 0 8px}
 </div></div>
 
 <div class="band" style="padding-top:0" id="settings"><div class="wrap two">
-  <section class="card">
+  <section class="card" id="gemCard">
     <h2>Gemini</h2>
     <div class="f"><label for="gKey">API key</label><input id="gKey" type="password" autocomplete="off" spellcheck="false"></div>
     <div class="f"><label for="gModel">Model</label><input id="gModel" spellcheck="false" autocapitalize="off"></div>
@@ -223,9 +223,10 @@ h3{font-size:15px;margin:18px 0 8px}
     <p class="note"><a href="https://aistudio.google.com/apikey" style="color:inherit">Get a free key</a></p>
   </section>
   <section class="card">
-    <h2>Backup</h2>
+    <h2>Settings</h2>
     <div class="actions" style="margin-top:0"><button class="primary" id="exportBtn">Export</button><button id="importBtn">Restore</button></div>
     <input id="importFile" type="file" accept="application/json,.json" hidden>
+    <div class="actions"><button id="openCalc">Budget calculator</button><button id="openGem">Gemini key</button></div>
     <div class="actions"><button id="wipeBtn">Erase all</button></div>
     <div id="wipeAsk" hidden style="margin-top:10px"><p style="margin:0 0 8px">Erase everything?</p><div class="actions" style="margin-top:0"><button class="primary" id="wipeYes" style="background:var(--red);border-color:var(--red)">Erase</button><button id="wipeNo">Cancel</button></div></div>
   </section>
@@ -503,7 +504,19 @@ $('wipeNo').addEventListener('click',()=>{$('wipeAsk').hidden=true});
 $('wipeYes').addEventListener('click',()=>{S={goal:2000,macros:null,exAdj:true,days:{}};saveLocal();$('wipeAsk').hidden=true;render();toast('All entries erased',false)});
 
 if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
-renderForm();render();calc();initAI();
+/* ---------- show/hide sections ---------- */
+const UI={calcDone:!!S.macros};try{Object.assign(UI,JSON.parse(localStorage.getItem('calUI')||'{}'))}catch(e){}
+let showCalc=false,showGem=false;
+function layout(){const cH=UI.calcDone&&!showCalc,gH=!!G.key&&!showGem;$('calcBand').hidden=cH;$('gemCard').hidden=gH;$('openCalc').hidden=!cH;$('openGem').hidden=!gH}
+const saveUI=()=>{try{localStorage.setItem('calUI',JSON.stringify(UI))}catch(e){}};
+$('useSugg').addEventListener('click',()=>{UI.calcDone=true;saveUI();showCalc=false;layout()});
+$('gSave').addEventListener('click',()=>{showGem=false;layout()});
+$('openCalc').addEventListener('click',()=>{showCalc=true;layout();$('calcBand').scrollIntoView({behavior:'smooth'})});
+$('openGem').addEventListener('click',()=>{showGem=true;layout();$('gemCard').scrollIntoView({behavior:'smooth'})});
+$('recapBtn').addEventListener('click',()=>{$('recapBand').hidden=false;mon=day.slice(0,7);renderRecap();$('recapBand').scrollIntoView({behavior:'smooth'})});
+$('recapClose').addEventListener('click',()=>{$('recapBand').hidden=true;window.scrollTo({top:0,behavior:'smooth'})});
+
+renderForm();render();calc();initAI();layout();
 }
 </script>
 </body>
